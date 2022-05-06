@@ -7,13 +7,13 @@ from .forms import ContactForm, NoteForm, Note
 def contact_detail(request, pk):
     contact = get_object_or_404(Contact, pk=pk)
     # notes = Note.objects.filter(contact_id=contact.pk)
-    # form = NoteForm()
+    form = NoteForm()
     return render(request, "contacts/contact_detail.html", {"contact": contact }) # this what I am trying to do at line 71-81
 
 def list_contacts(request):
     contacts = Contact.objects.all()
     return render(request, "contacts/list_contacts.html",
-                  {"contacts": contacts})
+                {"contacts": contacts})
 
 
 def add_contact(request):
@@ -54,21 +54,33 @@ def delete_contact(request, pk):
                   {"contact": contact})
     
     
-def add_note(request, contact_pk):
+def add_note(request, pk):
     # get the associated contact
-    contact = get_object_or_404(Contact, pk=contact_pk)
+    contact = get_object_or_404(Contact, pk=pk)
     # We need a form!
     form = NoteForm(data=request.POST)
     if form.is_valid():
         note = form.save(commit=False)
         note.contact = contact 
         note.save()
-        return redirect(to="contact_detail", pk=contact.pk)
+        return redirect(to="contact_detail", pk=pk)
 
-    # return render(
-    #     request, "contacts/contact_detail.html", {"form": form, "contact": contact}
-    # )
+    return render(
+        request, "contacts/contact_detail.html", {"form": form, "contact": contact}
+    )
 
+
+def Notes(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    if request.method == 'GET':
+        form = NoteForm()
+    else:
+        form = NoteForm(data=request.POST)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.contact = contact
+            note.save()
+            return redirect(to='notes_contact', pk=pk)
 # def contact_detail(request):
 #     if request.method == 'POST':
 #         form = ContactForm()
